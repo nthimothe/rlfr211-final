@@ -11,4 +11,4 @@ I hope that over time I can add more information and visualizations to the site.
 
 Screenshots
 
-![main_page](https://github.com/nthimothe/rlfr211-final/blob/main/screenshots/main_page.jpg)
+![main_page](https://github.com/nthimothe/rlfr211-final/blob/main/screenshots/main_page.png)
