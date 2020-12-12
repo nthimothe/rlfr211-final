@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title> Projet Final </title>
+  </head>
+  <body>
+    {% extends "layout.html" %}
+    {% block content %}
+    <div class="root">
+    <h1>Explorateurs du XVIème au XVIIème Siècle</h1>
+    <form method="POST">
+      <label for="cc_picker"> Couleur (Christophe Colon): </label>
+      <input name="cc_color" type="color" id="cc_picker" value="{{ value1 }}">
+      <br>
+      <br>
+      <label for="av_picker"> Couleur (Amerigo Vespucci): </label>
+      <input name="av_color" type="color" id="av_picker" value="{{ value2 }}">
+      <br>
+      <br>
+      <label for="vdg_picker"> Couleur (Vasco de Gama): </label>
+      <input name="vdg_color" type="color" id="vdg_picker" value="{{ value3 }}">
+      <br>
+      <br>
+      <input type="submit" id="submit">
+    </div>
+    </form>
+    <iframe class="map" src="/map_render" width="1200" height="700"></iframe>
+    {% endblock %}
+  </body>
+</html>

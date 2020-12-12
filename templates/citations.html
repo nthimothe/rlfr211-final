@@ -1,0 +1,14 @@
+<!DOCTYPE HTML>
+<html>
+  <body>
+    {% extends "layout.html" %}
+    {% block content %}
+    <div class = "about">
+    <h1>À Propos</h1>
+    {% for citation in citations %}
+        <p>{{ citation }}</p>
+    {% endfor %}
+    </div>
+    {% endblock %}
+  </body>
+</html>
