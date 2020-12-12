@@ -1,4 +1,4 @@
-# rlfr211-final
+# French Travel Narratives Final Project
 # About
 This project is an interactive web site built with entirely with a Flask backend in Python to visualize 
 the departure points of various, well-known explorers from the 15th and 16th centuries.
