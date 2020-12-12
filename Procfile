@@ -1,1 +1,1 @@
-web: gunicorn app.logic:app
+web: gunicorn app:app

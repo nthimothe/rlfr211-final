@@ -2,7 +2,7 @@
 """
 This module contains helper functions that help the flask backend work.
 """
-from logic import colors_cache, popups_cache
+from app import colors_cache, popups_cache
 import folium as f
 import base64
 
