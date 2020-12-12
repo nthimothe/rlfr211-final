@@ -36,9 +36,9 @@ def root():
         vdg_color = request.form['vdg_color']
         # update map_name
         increment_map_name()
-    # print("cc_color: %s" % cc_color)
-    # print("av_color: %s" % av_color)
-    # print("vdg_color: %s" % vdg_color)
+    print("cc_color: %s" % cc_color)
+    print("av_color: %s" % av_color)
+    print("vdg_color: %s" % vdg_color)
     map(cc_color,av_color,vdg_color, name=''.join(popups_cache.get('')))
     # update the html so the default value is what the user last entered
     return render_template(
@@ -312,3 +312,6 @@ def add_pb(map):
         fill_color=PB_COLOR
         ).add_to(map)
         """
+
+if __name__ == "__main__":
+    app.run()
