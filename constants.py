@@ -19,3 +19,9 @@ PALOS_COORDINATES = (37.2289, -6.8954)
 CADIZ_COORDINATES = (36.5271,-6.2886)
 SAN_LUC_COORDINATES = (36.7726,-6.3530)
 LISBON_COORDINATES = (38.7223, -9.1393)
+
+# store text file for duration of session
+ABOUT_TEXT = ""
+with open('templates/data/text/about.txt', 'r') as x:
+    ABOUT_TEXT = x.read()
+ABOUT_TEXT = ABOUT_TEXT.splitlines()

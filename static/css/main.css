@@ -17,9 +17,12 @@ header {
   margin-bottom: 10px;
 }
 
+header a {
+  color: #f1f1f1;
+}
+
 a:hover, a:visited, a:link, a:active{
   text-decoration: none;
-  color: #f1f1f1;
 }
 
 header h1.logo {

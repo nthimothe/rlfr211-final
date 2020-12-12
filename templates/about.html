@@ -5,7 +5,18 @@
     {% block content %}
     <div class = "about">
     <h1>À Propos</h1>
-    <p>{{ about }}</p>
+    <div class = "container" id="elementID"> </div>
+    <script>
+      var xhr= new XMLHttpRequest();
+      xhr.open('GET', 'about_text', true);
+      xhr.onreadystatechange= function() {
+        console.log("IN THIS FUNCTION");
+        if (this.readyState!==4) return;
+        if (this.status!==200) return; // or whatever error handling you want
+        document.getElementById('elementID').innerHTML= this.responseText;
+      };  
+      xhr.send();
+    </script>
     </div>
     {% endblock %}
   </body>

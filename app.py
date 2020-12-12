@@ -38,17 +38,15 @@ def root():
     # if colors are being submitted, redefine color vars
     if request.method == 'POST':
         clear_caches()
-        print('POST_REQUEST')
         cc_color = request.form['cc_color']
         av_color = request.form['av_color']
         vdg_color = request.form['vdg_color']
-    print("cc_color: %s" % cc_color)
-    print("av_color: %s" % av_color)
-    print("vdg_color: %s" % vdg_color)
+    # print("cc_color: %s" % cc_color)
+    # print("av_color: %s" % av_color)
+    # print("vdg_color: %s" % vdg_color)
 
     # if the user has already visited the site, set visited key + create a unique_dir_id for them, else access existing unique_dir_id
     unique_dir_id = get_dir_id()
-    print("\"{}\" whose type is {}".format(unique_dir_id, type(unique_dir_id)))
     make_dir(unique_dir_id)
     map(cc_color,av_color,vdg_color, os.path.join(unique_dir_id, 'map.html'))
 
@@ -68,19 +66,30 @@ def map_render():
 @app.route('/about')
 def about():
     about = ""
-    with open('templates/data/text/about.txt') as x:
-        about = x.read()
+    #with open('templates/data/text/about_text.html') as x:
+    #    about = x.read()
     return render_template(
         ABOUT,
-        about=about
+        #about=about
     )
+
+
+@app.route('/about_text')
+def about_text():
+    return render_template(
+        'data/text/jinja_about_template.txt',
+        lines=ABOUT_TEXT
+    )
+
+
+
 @app.route('/citations')
 def citations():
     citations = ""
     with open('templates/data/text/citations.txt') as x:
         citations = x.read()
     citations = citations.splitlines()
-    print(citations)
+    #print(citations)
     return render_template(
         CITATIONS,
         citations=citations
