@@ -2,11 +2,12 @@
 """
 This module contains helper functions that help the flask backend work.
 """
-from app import colors_cache, popups_cache
+from app import colors_cache, popups_cache, session
 import folium as f
 import base64
+import uuid
 
-# HELPER FUNCTIONS (NO ROUTES)
+# HELPER FUNCTIONS 
 def update_colors_cache(coordinates, original_color = ""):
     """
     Update colors_cache with average of two colors (`original_color` and color already present in cache) 
@@ -18,10 +19,8 @@ def update_colors_cache(coordinates, original_color = ""):
         res = ((r1+r2) // 2), ((g1+g2) // 2), ((b1+b2) // 2)
         colors_cache.delete(coordinates)
         colors_cache.add(coordinates,rgb_to_hex(res))
-        check_success(coordinates, rgb_to_hex(res))
     else:
         colors_cache.add(coordinates, original_color)
-        check_success(coordinates, original_color)
 
 def update_popups_cache(coordinates, html_content):
     """
@@ -71,17 +70,6 @@ def clear_caches():
     popups_cache.delete(None)
     popups_cache.add(None, dict())
 
-def increment_map_name():
-    """
-    Increment the name of map HTML file to reflect the latest update.
-    """
-    map_name = popups_cache.get('')
-    map_name[1] = str(int(map_name[1]) + 1)
-    popups_cache.delete('')
-    popups_cache.add('', map_name)
-    print(map_name)
-
-
 def load_popup_content(img_path, html_file_path, text_file_path):
     """ 
     Given a valid `img_path`, `html_file_path`, and `text_file_path`, this function 
@@ -108,6 +96,26 @@ def load_popup_content(img_path, html_file_path, text_file_path):
 def make_popup(html_content):
     frame = f.IFrame(html_content, figsize=(6,5))
     return f.Popup(frame)
+
+
+def make_dir(dir_name):
+    """
+    If a given `dir_name` does not exist with the templates directory, create the directory.
+    """
+    import os
+    path = os.path.join('templates', dir_name)
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+def get_dir_id():
+    if 'visited' not in session:
+        session['visited'] = True
+        unique_dir_id = str(uuid.uuid1())
+        session['dir'] = unique_dir_id
+    else:
+        unique_dir_id = session['dir']
+    return unique_dir_id
+
 
 def check_success(coordinates,color, newline=False):
     print("\n") if newline else None
