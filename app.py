@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from markupsafe import escape
 from constants import *
 import folium as f
 from cache import colors_cache, popups_cache
 from helpers import *
+import uuid 
+import os
+
 """
 Flask app hosted at [________]
 Valid paths include:
@@ -14,19 +17,24 @@ Valid paths include:
 """
 
 app = Flask(__name__)
-
+app.config.from_object('config')
+cache_config = {'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 0}
 # maps lat,lon tuples to hex colors
-colors_cache.init_app(app=app, config={'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 0})
+colors_cache.init_app(app=app, config=cache_config)
 # maps None to dict of lat,lon tuples to appropriate pop up messages
-popups_cache.init_app(app=app, config={'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 0})
-popups_cache.add('',['map','0'])
+popups_cache.init_app(app=app, config=cache_config)
 popups_cache.add(None,dict())
+
+@app.before_request
+def set_session():
+    session.permanent = True
 
 @app.route('/', methods=['GET', 'POST'])
 def root():
     cc_color = ORIG_AV
     av_color = ORIG_CC
     vdg_color = ORIG_VDG
+
     # if colors are being submitted, redefine color vars
     if request.method == 'POST':
         clear_caches()
@@ -34,12 +42,16 @@ def root():
         cc_color = request.form['cc_color']
         av_color = request.form['av_color']
         vdg_color = request.form['vdg_color']
-        # update map_name
-        increment_map_name()
     print("cc_color: %s" % cc_color)
     print("av_color: %s" % av_color)
     print("vdg_color: %s" % vdg_color)
-    map(cc_color,av_color,vdg_color, name=''.join(popups_cache.get('')))
+
+    # if the user has already visited the site, set visited key + create a unique_dir_id for them, else access existing unique_dir_id
+    unique_dir_id = get_dir_id()
+    print("\"{}\" whose type is {}".format(unique_dir_id, type(unique_dir_id)))
+    make_dir(unique_dir_id)
+    map(cc_color,av_color,vdg_color, os.path.join(unique_dir_id, 'map.html'))
+
     # update the html so the default value is what the user last entered
     return render_template(
         FORMATTED_MAP,
@@ -50,8 +62,8 @@ def root():
 
 @app.route('/map_render')
 def map_render():
-    name = ''.join(popups_cache.get(''))
-    return render_template(name + '.html')
+    assert 'visited' in session, "'visited' must be in session dict"
+    return render_template(os.path.join(session['dir'], 'map.html'))
     
 @app.route('/about')
 def about():
@@ -62,7 +74,6 @@ def about():
         ABOUT,
         about=about
     )
-
 @app.route('/citations')
 def citations():
     citations = ""
@@ -75,26 +86,31 @@ def citations():
         citations=citations
     )
 
-def map(cc_color,av_color,vdg_color, name="map"):
+def map(cc_color,av_color,vdg_color, name="map.html"):
     """
     Creates a new map using appropriate color parameter for each explorer.
     cc_color : Color for Christopher Columbus's departure locations.
     av_color : Color for Amerigo Vespucci's departure locations.
     vdg_color : Color for Vasco da Gama's departure locations.
     """
+    import os
+    import random
+    coordinates = [PALOS_COORDINATES, CADIZ_COORDINATES, LISBON_COORDINATES, SAN_LUC_COORDINATES]
+
     map = f.Map(
-        location=['48.8566', '2.3522'], 
+        location=coordinates[random.randrange(len(coordinates))],
         zoom_start = 12, 
         min_zoom = 3, 
         tiles = 'CartoDB positron')
     cc = add_cc(map, cc_color)
     av = add_av(map, av_color)
     vdg = add_vdg(map, vdg_color)
+
     # add all circles and circle markers to the map
     for each in [cc, av, vdg]:
         for item in each:
             item.add_to(map)
-    map.save("templates/" + name + '.html')
+    map.save(os.path.join('templates', name))
 
 
 def add_cc(map, cc_color):
@@ -105,7 +121,6 @@ def add_cc(map, cc_color):
     CC_COLOR = cc_color
 
     # first voyage
-    PALOS_COORDINATES = (37.2289, -6.8954)
     # update caches -- if a coordinate is already mapped to a color, average colors, else map coordinates to color
     update_colors_cache(PALOS_COORDINATES, original_color=CC_COLOR)
     update_popups_cache(PALOS_COORDINATES, load_popup_content('templates/data/photos/colomb.jpeg','templates/cc.html', 'templates/data/text/palos_cc.txt'))
@@ -129,7 +144,6 @@ def add_cc(map, cc_color):
 
 
     # second, fourth voyages
-    CADIZ_COORDINATES = (36.5271,-6.2886)
     # update caches
     update_colors_cache(CADIZ_COORDINATES, CC_COLOR)
     # update cache with html_content from colombus's second and fourth voyages
@@ -155,7 +169,6 @@ def add_cc(map, cc_color):
 
 
     # third voyage
-    SAN_LUC_COORDINATES = (36.7726,-6.3530)
     # update caches
     update_colors_cache(SAN_LUC_COORDINATES, CC_COLOR)
     update_popups_cache(SAN_LUC_COORDINATES, load_popup_content('templates/data/photos/colomb.jpeg','templates/cc.html', 'templates/data/text/sanlucar_cc.txt'))
@@ -189,7 +202,6 @@ def add_av(map, av_color):
 
 
     # first voyage (under the service of Spain)
-    CADIZ_COORDINATES = (36.5271,-6.2886)
     # update caches
     update_colors_cache(CADIZ_COORDINATES, ORIG_AV_COLOR)
     update_popups_cache(CADIZ_COORDINATES, load_popup_content('templates/data/photos/vespucci.jpg','templates/av.html', 'templates/data/text/cadiz_av.txt'))
@@ -213,7 +225,6 @@ def add_av(map, av_color):
 
 
     # second voyage under the service of Portugal
-    LISBON_COORDINATES = (38.7223, -9.1393)
     # update caches
     update_colors_cache(LISBON_COORDINATES, ORIG_AV_COLOR)
     update_popups_cache(LISBON_COORDINATES, load_popup_content('templates/data/photos/vespucci.jpg','templates/av.html', 'templates/data/text/lisbon_av.txt'))
@@ -243,9 +254,7 @@ def add_vdg(map, vdg_color):
     """
     ORIG_VDG_COLOR = vdg_color
 
-
     # first + second? voyages under the service of Portugal
-    LISBON_COORDINATES = (38.7223, -9.1393)
     # update caches
     update_colors_cache(LISBON_COORDINATES, ORIG_VDG_COLOR)
     update_popups_cache(LISBON_COORDINATES, load_popup_content('templates/data/photos/daGama.jpg','templates/vdg.html', 'templates/data/text/lisbon_vdg.txt'))
