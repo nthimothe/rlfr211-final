@@ -5,8 +5,9 @@ This module contains helper functions that help the flask backend work.
 from app import session
 import folium as f
 import base64
+import uuid
 
-# HELPER FUNCTIONS (NO ROUTES)
+# HELPER FUNCTIONS 
 def update_colors_cache(coordinates, original_color = ""):
     """
     Update colors_cache with average of two colors (`original_color` and color already present in cache) 
@@ -51,17 +52,6 @@ def clear_colors_cache():
     Clear colors_cache. 
     """
     session['colors_cache'].clear()
-
-def increment_map_name():
-    """
-    Increment the name of map HTML file to reflect the latest update.
-    """
-    map_name = popups_cache.get('')
-    map_name[1] = str(int(map_name[1]) + 1)
-    popups_cache.delete('')
-    popups_cache.add('', map_name)
-    print(map_name)
-
 
 def load_popup_content(img_path, html_file_path, text_file_path):
     """ 
