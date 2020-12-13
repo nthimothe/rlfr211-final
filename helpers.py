@@ -1,8 +1,8 @@
-#(c) 2020 nathan thimothe
+# (c) 2020 nathan thimothe
 """
 This module contains helper functions that help the flask backend work.
 """
-from app import colors_cache, popups_cache, session
+from app import session
 import folium as f
 import base64
 import uuid
@@ -12,34 +12,19 @@ def update_colors_cache(coordinates, original_color = ""):
     """
     Update colors_cache with average of two colors (`original_color` and color already present in cache) 
     """
-    if colors_cache.get(coordinates) is not None:
+    assert 'colors_cache' in session, "colors cache must be in session"
+    cache = session['colors_cache']
+    if cache.get(str(coordinates), None) is not None:
         r1, g1, b1 = hex_to_rgb(original_color)
-        r2, g2, b2 = hex_to_rgb(colors_cache.get(coordinates))
+        r2, g2, b2 = hex_to_rgb(cache.get(str(coordinates)))
         # average RGB values
         res = ((r1+r2) // 2), ((g1+g2) // 2), ((b1+b2) // 2)
-        colors_cache.delete(coordinates)
-        colors_cache.add(coordinates,rgb_to_hex(res))
+        #cache.delete(coordinates)
+        cache[str(coordinates)] = rgb_to_hex(res)
     else:
-        colors_cache.add(coordinates, original_color)
-
-def update_popups_cache(coordinates, html_content):
-    """
-    Update popups_cache by mapping `coordinates` to correct `html_content`. In the case that `coordinates` already maps content, concatenate `html_content` to content that already exists within the cache.
-    """
-    # access dictionary at key None
-    d = popups_cache.get(None)
-    if d is None:
-        return
-    # if the coordinates exist within popups_cache[None] then 
-    # add to html_content at that key, the new iframe + popup will be created out of this updated html content. Je souhaite que ca aille aller
-    if d.get(coordinates,None) is not None:
-        d[coordinates] += html_content
-    # map coordinates to html content (at popup) if empty
-    else:
-        d[coordinates] = html_content if html_content is not None else None
-    # remove k-v pair and re add
-    popups_cache.delete(None)
-    popups_cache.add(None, d)
+        cache[str(coordinates)] = original_color # since keys must be str, int, float, bool or None
+    # overwrite the cache at key colors_cache with updated cache
+    session['colors_cache'] = cache
 
 def rgb_to_hex(rgb):
     """
@@ -62,13 +47,11 @@ def hex_to_rgb(hex_val):
     return list((int(hex_val[:2],16), int(hex_val[2:4],16), int(hex_val[4:], 16)))
 
 
-def clear_caches():
+def clear_colors_cache():
     """
-    Clear colors_cache and popups_cache of all cache relevant to their main functionality.
+    Clear colors_cache. 
     """
-    colors_cache.clear()
-    popups_cache.delete(None)
-    popups_cache.add(None, dict())
+    session['colors_cache'].clear()
 
 def load_popup_content(img_path, html_file_path, text_file_path):
     """ 
@@ -117,11 +100,10 @@ def get_dir_id():
     return unique_dir_id
 
 
-def check_success(coordinates,color, newline=False):
-    print("\n") if newline else None
-    if colors_cache.get(coordinates) == color:
-        print("Successfully added %s" % color) 
-        print("{}: {}".format(coordinates,colors_cache.get(coordinates)))
-    else:
-        print("Unable to add %s" % color)
+def set_colors_cache():
+    """
+    If a session does not have a colors_cache (lat,long tuples mapped to colors), set it equal to an empty dictionary
+    """
+    if 'colors_cache' not in session:
+        session['colors_cache'] = dict()
 
