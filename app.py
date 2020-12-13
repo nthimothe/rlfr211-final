@@ -6,6 +6,7 @@ import folium as f
 from helpers import *
 import uuid 
 import os
+import config
 
 """
 Flask app hosted at https://explorateurs.herokuapp.com/
@@ -17,7 +18,10 @@ Valid paths include:
 """
 
 app = Flask(__name__)
-app.config.from_object('config')
+app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['DEBUG'] = config.DEBUG
+app.config['TEMPLATES_AUTO_RELOAD'] = config.TEMPLATES_AUTO_RELOAD
+#app.config.from_object('config')
 #cache_config = {'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 0}
 #colors_cache.init_app(app=app, config=cache_config)
 # maps None to dict of lat,lon tuples to appropriate pop up messages
