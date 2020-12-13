@@ -4,4 +4,4 @@ qu'on ne verra peut-être pas aux manuels scolaires. J'espère que des outils in
 de la colonisation d'une manière plus familière aux adultes et aux étudiants d'aujourd'hui. Je veux continuer à ajouter des explorateurs au fil du temps,
 mais je crois que ce qui est présent maintenant constitue un bon point de départ pour une discussion productive de comment nous, nous-mêmes, et la société 
 parlons de ces voyageurs. Toutes les citations que j'ai utilisées peuvent être trouvées dans l'onglet marqué « Citations », ou cliquer <a href="citations"}"> ici</a>. 
-Pour trouver plus d'information sur moi-même en tant que programmeur, visitez ce <a href="https://nthimothe.github.io/">lien </a>!
+Pour trouver plus d'information sur moi-même en tant que programmeur, visitez ce <a href="https://nthimothe.github.io/">lien</a>!
