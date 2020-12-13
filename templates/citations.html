@@ -1,14 +1,27 @@
 <!DOCTYPE HTML>
 <html>
+  <head>
+    <style type="text/css">
+       .tab { margin-left: 40px; }
+      </style>
+  </head>
   <body>
     {% extends "layout.html" %}
     {% block content %}
     <div class = "about">
-    <h1>À Propos</h1>
-    {% for citation in citations %}
-        <p>{{ citation }}</p>
-    {% endfor %}
-    </div>
+    <h1>Citations</h1>
+    <div class = "container" id="elementID"> </div>
+    <script>
+      // to read in about_text content as HTML, using java script to set inner HTML of element ID tag
+      var xhr= new XMLHttpRequest();
+      xhr.open('GET', 'citations_text', true);
+      xhr.onreadystatechange= function() {
+        if (this.readyState!==4) return;
+        if (this.status!==200) return; // or whatever error handling you want
+        document.getElementById('elementID').innerHTML= this.responseText;
+      };  
+      xhr.send();
+    </script>
     {% endblock %}
   </body>
 </html>

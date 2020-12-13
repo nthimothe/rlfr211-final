@@ -27,6 +27,11 @@ with open('templates/data/text/about.txt', 'r') as x:
     ABOUT_TEXT = x.read()
 ABOUT_TEXT = ABOUT_TEXT.splitlines()
 
+CITATION_TEXT = ""
+with open('templates/data/text/citations.txt', 'r') as x:
+    CITATION_TEXT = x.read()
+CITATION_TEXT = CITATION_TEXT.splitlines()
+
 
 PALOS_HTML = []
 _palos_files = ['templates/data/text/palos_cc.txt']

@@ -1,7 +1,7 @@
-Bonjour! J'ai créé ce site web pour mieux visualiser d'ou viennent des voyageurs du XVème et du XVIème siècle dont on parle beaucoup.
-J'ai voulu inclure des pop-ups pour donner un peu d'histoire pour chacun des voyages fait par chaque explorateur, et aussi donner un peu d'information
-que on ne verra pas peut-être aux manuels scolaires. J'espère que des outils intéractifs  comme ce site web peuvent mieux appendre l'histoire de la 
-colonisation d'une manière plus familiaire aux adultes et aux étudiants d'aujourd'hui. Je veux continuer à ajouter des explorateurs au fil du temps,
-mais je crois ce qui est présent maintenant constitue un bon point de départ pour une discussion productive de comment nous, nous-mêmes, et la société
-parle de ces voyageurs. Toutes les citations que j'ai utilisées peuvent être trouvées dans l'onglet marqué « Citations », ou cliquer <a href="citations"}"> ici</a>.
+Bonjour! J'ai créé ce site web pour mieux visualiser d'où viennent les voyageurs du XVème et du XVIème siècle dont on parle beaucoup. 
+J'ai voulu inclure des pop-ups pour donner un peu de contexte historique à chaque voyage, et aussi donner un peu d'information 
+qu'on ne verra peut-être pas aux manuels scolaires. J'espère que des outils interactifs comme ce site web peuvent mieux apprendre l'histoire 
+de la colonisation d'une manière plus familière aux adultes et aux étudiants d'aujourd'hui. Je veux continuer à ajouter des explorateurs au fil du temps,
+mais je crois que ce qui est présent maintenant constitue un bon point de départ pour une discussion productive de comment nous, nous-mêmes, et la société 
+parlons de ces voyageurs. Toutes les citations que j'ai utilisées peuvent être trouvées dans l'onglet marqué « Citations », ou cliquer <a href="citations"}"> ici</a>. 
 Pour trouver plus d'information sur moi-même en tant que programmeur, visitez ce <a href="https://nthimothe.github.io/">lien </a>!

@@ -21,12 +21,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 app.config['DEBUG'] = config.DEBUG
 app.config['TEMPLATES_AUTO_RELOAD'] = config.TEMPLATES_AUTO_RELOAD
-#app.config.from_object('config')
-#cache_config = {'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 0}
-#colors_cache.init_app(app=app, config=cache_config)
-# maps None to dict of lat,lon tuples to appropriate pop up messages
-#popups_cache.init_app(app=app, config=cache_config)
-#popups_cache.add(None,dict())
 
 @app.before_request
 def set_session():
@@ -43,13 +37,10 @@ def root():
         cc_color = request.form['cc_color']
         av_color = request.form['av_color']
         vdg_color = request.form['vdg_color']
-    # print("cc_color: %s" % cc_color)
-    # print("av_color: %s" % av_color)
-    # print("vdg_color: %s" % vdg_color)
     # if the user has already visited the site, set visited key + create a unique_dir_id for them, else access existing unique_dir_id
     unique_dir_id = get_dir_id()
     make_dir(unique_dir_id)
-    # set caches, if they do not yet exist
+    # set colors cache, if it does not yet exist
     set_colors_cache()
 
     map(cc_color,av_color,vdg_color, os.path.join(unique_dir_id, 'map.html'))
@@ -69,31 +60,31 @@ def map_render():
     
 @app.route('/about')
 def about():
-    about = ""
-    return render_template(
-        ABOUT,
-    )
+    return render_template(ABOUT)
 
 @app.route('/about_text')
 def about_text():
+    """
+    Post ABOUT_TEXT as '/about_text' so JS can load the HTML into elementID id.
+    """
     return render_template(
         'data/text/jinja_about_template.txt',
         lines=ABOUT_TEXT
     )
 
-
+@app.route('/citations_text')
+def citation_text():
+    """
+    Post CITATION_TEXT at '/citation_text' so JS can load the HTML into elementID id.
+    """
+    return render_template(
+        'data/text/jinja_about_template.txt',
+        lines=CITATION_TEXT
+    )
 
 @app.route('/citations')
 def citations():
-    citations = ""
-    with open('templates/data/text/citations.txt') as x:
-        citations = x.read()
-    citations = citations.splitlines()
-    #print(citations)
-    return render_template(
-        CITATIONS,
-        citations=citations
-    )
+    return render_template(CITATIONS)
 
 def map(cc_color,av_color,vdg_color, name="map.html"):
     """
