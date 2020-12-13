@@ -7,10 +7,10 @@
     <h1>À Propos</h1>
     <div class = "container" id="elementID"> </div>
     <script>
+      // to read in about_text content as HTML, using java script to set inner HTML of element ID tag
       var xhr= new XMLHttpRequest();
       xhr.open('GET', 'about_text', true);
       xhr.onreadystatechange= function() {
-        console.log("IN THIS FUNCTION");
         if (this.readyState!==4) return;
         if (this.status!==200) return; // or whatever error handling you want
         document.getElementById('elementID').innerHTML= this.responseText;

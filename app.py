@@ -1,14 +1,14 @@
+# (c) 2020 nt
 from flask import Flask, render_template, request, session
 from markupsafe import escape
 from constants import *
 import folium as f
-from cache import colors_cache, popups_cache
 from helpers import *
 import uuid 
 import os
 
 """
-Flask app hosted at [________]
+Flask app hosted at https://explorateurs.herokuapp.com/
 Valid paths include:
     - `\`
     - `\about`
@@ -18,12 +18,11 @@ Valid paths include:
 
 app = Flask(__name__)
 app.config.from_object('config')
-cache_config = {'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 0}
-# maps lat,lon tuples to hex colors
-colors_cache.init_app(app=app, config=cache_config)
+#cache_config = {'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 0}
+#colors_cache.init_app(app=app, config=cache_config)
 # maps None to dict of lat,lon tuples to appropriate pop up messages
-popups_cache.init_app(app=app, config=cache_config)
-popups_cache.add(None,dict())
+#popups_cache.init_app(app=app, config=cache_config)
+#popups_cache.add(None,dict())
 
 @app.before_request
 def set_session():
@@ -34,20 +33,21 @@ def root():
     cc_color = ORIG_AV
     av_color = ORIG_CC
     vdg_color = ORIG_VDG
-
     # if colors are being submitted, redefine color vars
     if request.method == 'POST':
-        clear_caches()
+        clear_colors_cache()
         cc_color = request.form['cc_color']
         av_color = request.form['av_color']
         vdg_color = request.form['vdg_color']
     # print("cc_color: %s" % cc_color)
     # print("av_color: %s" % av_color)
     # print("vdg_color: %s" % vdg_color)
-
     # if the user has already visited the site, set visited key + create a unique_dir_id for them, else access existing unique_dir_id
     unique_dir_id = get_dir_id()
     make_dir(unique_dir_id)
+    # set caches, if they do not yet exist
+    set_colors_cache()
+
     map(cc_color,av_color,vdg_color, os.path.join(unique_dir_id, 'map.html'))
 
     # update the html so the default value is what the user last entered
@@ -66,13 +66,9 @@ def map_render():
 @app.route('/about')
 def about():
     about = ""
-    #with open('templates/data/text/about_text.html') as x:
-    #    about = x.read()
     return render_template(
         ABOUT,
-        #about=about
     )
-
 
 @app.route('/about_text')
 def about_text():
@@ -109,8 +105,10 @@ def map(cc_color,av_color,vdg_color, name="map.html"):
     map = f.Map(
         location=coordinates[random.randrange(len(coordinates))],
         zoom_start = 12, 
-        min_zoom = 3, 
-        tiles = 'CartoDB positron')
+        min_zoom = 2, 
+        tiles = 'CartoDB positron',
+        max_bounds=True
+        )
     cc = add_cc(map, cc_color)
     av = add_av(map, av_color)
     vdg = add_vdg(map, vdg_color)
@@ -130,9 +128,8 @@ def add_cc(map, cc_color):
     CC_COLOR = cc_color
 
     # first voyage
-    # update caches -- if a coordinate is already mapped to a color, average colors, else map coordinates to color
+    # update cache -- if a coordinate is already mapped to a color, average colors, else map coordinates to color
     update_colors_cache(PALOS_COORDINATES, original_color=CC_COLOR)
-    update_popups_cache(PALOS_COORDINATES, load_popup_content('templates/data/photos/colomb.jpeg','templates/cc.html', 'templates/data/text/palos_cc.txt'))
 
     c1 = f.Circle(
         radius=INNER_RADIUS,
@@ -145,7 +142,7 @@ def add_cc(map, cc_color):
     cm1 = f.CircleMarker(
         radius=OUTER_RADIUS,
         location=PALOS_COORDINATES,
-        popup=make_popup(popups_cache.get(None)[PALOS_COORDINATES]), # make popup out of most up-to-date HTML content
+        popup=make_popup(PALOS_HTML),
         color=CC_COLOR,
         fill=True,
         fill_color=CC_COLOR
@@ -153,11 +150,8 @@ def add_cc(map, cc_color):
 
 
     # second, fourth voyages
-    # update caches
+    # update colors cache
     update_colors_cache(CADIZ_COORDINATES, CC_COLOR)
-    # update cache with html_content from colombus's second and fourth voyages
-    update_popups_cache(CADIZ_COORDINATES, load_popup_content('templates/data/photos/colomb.jpeg','templates/cc.html', 'templates/data/text/cadiz_cc_1.txt'))
-    update_popups_cache(CADIZ_COORDINATES, load_popup_content('templates/data/photos/colomb.jpeg','templates/cc.html', 'templates/data/text/cadiz_cc_2.txt'))
 
     c2 = f.Circle(
         radius=INNER_RADIUS,
@@ -170,7 +164,7 @@ def add_cc(map, cc_color):
     cm2 = f.CircleMarker(
         radius=OUTER_RADIUS,
         location=CADIZ_COORDINATES,
-        popup=make_popup(popups_cache.get(None)[CADIZ_COORDINATES]),
+        popup='',
         color=CC_COLOR,
         fill=True,
         fill_color=CC_COLOR
@@ -178,10 +172,9 @@ def add_cc(map, cc_color):
 
 
     # third voyage
-    # update caches
+    # update colors cache
     update_colors_cache(SAN_LUC_COORDINATES, CC_COLOR)
-    update_popups_cache(SAN_LUC_COORDINATES, load_popup_content('templates/data/photos/colomb.jpeg','templates/cc.html', 'templates/data/text/sanlucar_cc.txt'))
-
+   
     c3 = f.Circle(
         radius=INNER_RADIUS,
         location=SAN_LUC_COORDINATES,
@@ -193,7 +186,7 @@ def add_cc(map, cc_color):
     cm3 = f.CircleMarker(
         radius=OUTER_RADIUS,
         location=SAN_LUC_COORDINATES,
-        popup=make_popup(popups_cache.get(None)[SAN_LUC_COORDINATES]),
+        popup=make_popup(SANLUCAR_HTML),
         color=CC_COLOR,
         fill=True,
         fill_color=CC_COLOR
@@ -211,9 +204,8 @@ def add_av(map, av_color):
 
 
     # first voyage (under the service of Spain)
-    # update caches
+    # update colors cache
     update_colors_cache(CADIZ_COORDINATES, ORIG_AV_COLOR)
-    update_popups_cache(CADIZ_COORDINATES, load_popup_content('templates/data/photos/vespucci.jpg','templates/av.html', 'templates/data/text/cadiz_av.txt'))
 
     c1 = f.Circle(
         radius=INNER_RADIUS,
@@ -226,17 +218,16 @@ def add_av(map, av_color):
     cm1 = f.CircleMarker(
         radius=OUTER_RADIUS,
         location=CADIZ_COORDINATES,
-        popup=make_popup(popups_cache.get(None)[CADIZ_COORDINATES]),
-        color=colors_cache.get(CADIZ_COORDINATES),
+        popup=make_popup(CADIZ_HTML),
+        color=session['colors_cache'][str(CADIZ_COORDINATES)],
         fill=True,
-        fill_color=colors_cache.get(CADIZ_COORDINATES)
+        fill_color=session['colors_cache'][str(CADIZ_COORDINATES)]
         )
 
 
     # second voyage under the service of Portugal
     # update caches
     update_colors_cache(LISBON_COORDINATES, ORIG_AV_COLOR)
-    update_popups_cache(LISBON_COORDINATES, load_popup_content('templates/data/photos/vespucci.jpg','templates/av.html', 'templates/data/text/lisbon_av.txt'))
 
     c2 = f.Circle(
         radius=INNER_RADIUS,
@@ -249,10 +240,10 @@ def add_av(map, av_color):
     cm2 = f.CircleMarker(
         radius=OUTER_RADIUS,
         location=LISBON_COORDINATES,
-        popup=make_popup(popups_cache.get(None)[LISBON_COORDINATES]),
-        color=colors_cache.get(LISBON_COORDINATES),
+        popup='',
+        color=session['colors_cache'][str(LISBON_COORDINATES)],
         fill=True,
-        fill_color=colors_cache.get(LISBON_COORDINATES)
+        fill_color=session['colors_cache'][str(LISBON_COORDINATES)]
         )
 
     return [c1,cm1,c2,cm2]
@@ -266,8 +257,7 @@ def add_vdg(map, vdg_color):
     # first + second? voyages under the service of Portugal
     # update caches
     update_colors_cache(LISBON_COORDINATES, ORIG_VDG_COLOR)
-    update_popups_cache(LISBON_COORDINATES, load_popup_content('templates/data/photos/daGama.jpg','templates/vdg.html', 'templates/data/text/lisbon_vdg.txt'))
-
+   
     c1 = f.Circle(
         radius=INNER_RADIUS,
         location=LISBON_COORDINATES,
@@ -279,10 +269,10 @@ def add_vdg(map, vdg_color):
     cm1 = f.CircleMarker(
         radius=OUTER_RADIUS,
         location=LISBON_COORDINATES,
-        popup=make_popup(popups_cache.get(None)[LISBON_COORDINATES]),
-        color=colors_cache.get(LISBON_COORDINATES),
+        popup=make_popup(LISBON_HTML),
+        color=session['colors_cache'][str(LISBON_COORDINATES)],
         fill=True,
-        fill_color=colors_cache.get(LISBON_COORDINATES)
+        fill_color=session['colors_cache'][str(LISBON_COORDINATES)]
         )
 
     return [c1,cm1]
