@@ -7,7 +7,7 @@ import folium as f
 import base64
 import uuid
 
-# HELPER FUNCTIONS (NO ROUTES)
+# HELPER FUNCTIONS 
 def update_colors_cache(coordinates, original_color = ""):
     """
     Update colors_cache with average of two colors (`original_color` and color already present in cache) 
